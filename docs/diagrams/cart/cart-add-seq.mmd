@@ -1,0 +1,53 @@
+sequenceDiagram
+    actor User
+    participant API as CartController
+    participant Service as CartService
+    participant CartRepo as CartRepository
+    participant StockRepo as StockRepository
+    participant DB as MySQL
+
+    User->>API: POST /api/carts
+    Note over User,API: {memberId: 1,optionId: 2,quantity: 1}
+
+    API->>API: @Valid 검증
+    API->>Service: addToCart(request)
+
+    Service->>DB: START TRANSACTION
+
+    Note over Service,DB: Step 1: 재고 확인
+    Service->>StockRepo: findByOptionId(2)
+    StockRepo->>DB: SELECT available_quantityFROM stockWHERE option_id = 2
+
+    alt 재고 부족
+        DB-->>StockRepo: available_quantity = 0
+        StockRepo-->>Service: Stock (재고 0)
+        Service->>DB: ROLLBACK
+        Service-->>API: OutOfStockException
+        API-->>User: 409 Conflict{error: "OUT_OF_STOCK",availableStock: 0}
+    else 재고 충분
+        DB-->>StockRepo: available_quantity = 30
+
+        Note over Service,DB: Step 2: 기존 장바구니 확인
+        Service->>CartRepo: findByMemberIdAndOptionId(1, 2)
+        CartRepo->>DB: SELECT * FROM cartWHERE member_id = 1AND option_id = 2
+
+        alt 이미 담겨있음
+            DB-->>CartRepo: Cart (기존)
+            Service->>CartRepo: updateQuantity(cartId, +1)
+            CartRepo->>DB: UPDATE cartSET quantity = quantity + 1WHERE cart_id = ?
+        else 처음 담음
+            DB-->>CartRepo: Empty
+            Service->>CartRepo: save(newCart)
+            CartRepo->>DB: INSERT INTO cart(member_id, option_id, quantity)
+        end
+
+        Note over Service,DB: Step 3: 총 개수 조회
+        Service->>CartRepo: countByMemberId(1)
+        CartRepo->>DB: SELECT COUNT(*)FROM cartWHERE member_id = 1
+
+        DB-->>CartRepo: totalItems = 3
+        Service->>DB: COMMIT
+
+        Service-->>API: CartResponse{cartId: 1, totalItems: 3}
+        API-->>User: 201 Created
+    end

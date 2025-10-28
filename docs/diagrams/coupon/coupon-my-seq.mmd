@@ -1,0 +1,61 @@
+sequenceDiagram
+    actor User
+    participant API as CouponController
+    participant Service as CouponService
+    participant DB as MySQL
+
+    User->>API: POST /api/coupons/1/issue
+    Note over User,API: {memberId: 1}
+
+    API->>Service: issueCoupon(couponId=1, memberId=1)
+    Service->>DB: START TRANSACTION
+
+    Note over Service,DB: Step 1: 쿠폰 조회
+    Service->>DB: SELECT * FROM couponWHERE coupon_id = 1
+
+    alt 쿠폰 없음
+        DB-->>Service: Empty
+        Service->>DB: ROLLBACK
+        Service-->>API: CouponNotFoundException
+        API-->>User: 404 Not Found
+    else 쿠폰 존재
+        DB-->>Service: Coupon
+
+        Note over Service,DB: Step 2: 발급 검증
+        Service->>Service: 기간 체크(valid_from ~ valid_until)
+
+        alt 기간 만료
+            Service->>DB: ROLLBACK
+            Service-->>API: CouponExpiredException
+            API-->>User: 400 Bad Request{error: "COUPON_EXPIRED"}
+        else 기간 OK
+            Note over Service,DB: Step 3: 중복 체크
+            Service->>DB: SELECT COUNT(*)FROM member_couponWHERE member_id = 1AND coupon_id = 1
+
+            alt 이미 발급받음
+                DB-->>Service: count = 1
+                Service->>DB: ROLLBACK
+                Service-->>API: AlreadyIssuedException
+                API-->>User: 409 Conflict{error: "ALREADY_ISSUED"}
+            else 발급 가능
+                Note over Service,DB: Step 4: 선착순 발급
+                Service->>DB: UPDATE couponSET issued_quantity = issued_quantity + 1WHERE coupon_id = 1AND issued_quantity < total_quantity
+
+                alt 품절 (UPDATE 실패)
+                    DB-->>Service: affected rows = 0
+                    Service->>DB: ROLLBACK
+                    Service-->>API: CouponSoldOutException
+                    API-->>User: 409 Conflict{error: "COUPON_SOLD_OUT"}
+                else 발급 성공
+                    DB-->>Service: affected rows = 1
+
+                    Note over Service,DB: Step 5: 회원 쿠폰 생성
+                    Service->>DB: INSERT INTO member_coupon(member_id, coupon_id,status='UNUSED',expired_at=valid_until)
+
+                    Service->>DB: COMMIT
+                    Service-->>API: CouponIssueResponse{memberCouponId,couponName,discountValue,expiredAt}
+                    API-->>User: 201 Created
+                end
+            end
+        end
+    end
