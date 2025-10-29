@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant User
+    participant ProductController
+    participant ProductService
+    participant ProductRepository
+
+    User->>ProductController: GET /api/products?page=0&size=20
+    ProductController->>ProductService: getProducts(page, size)
+    ProductService->>ProductRepository: findAll()
+    ProductRepository-->>ProductService: List<Product>
+    ProductService-->>ProductController: List<ProductDto>
+    ProductController-->>User: 200 OK
+
+    User->>ProductController: GET /api/products/{productId}
+    ProductController->>ProductService: getProductById(productId)
+    ProductService->>ProductRepository: findById(productId)
+    ProductRepository-->>ProductService: Product
+    ProductService-->>ProductController: ProductDto
+    ProductController-->>User: 200 OK
+
+    User->>ProductController: GET /api/products/popular?days=3&limit=5
+    ProductController->>ProductService: getPopularProducts(days, limit)
+    ProductService->>ProductRepository: findTopBySales(days, limit)
+    ProductRepository-->>ProductService: List<Product>
+    ProductService-->>ProductController: List<ProductDto>
+    ProductController-->>User: 200 OK

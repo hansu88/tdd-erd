@@ -1,0 +1,37 @@
+sequenceDiagram
+    participant User
+    participant OrderController
+    participant OrderService
+    participant CartRepository
+    participant ProductService
+    participant OrderRepository
+    participant OrderItemRepository
+    participant MemberCouponRepository
+    participant MemberRepository
+
+    User->>OrderController: POST /api/orders
+    OrderController->>OrderService: createOrder(request)
+    OrderService->>CartRepository: findCartItems(memberId)
+    CartRepository-->>OrderService: List<CartItems>
+    OrderService->>ProductService: checkStockAndReserve(cartItems)
+    ProductService-->>OrderService: success/fail
+    OrderService->>MemberCouponRepository: validateCoupon(memberCouponId)
+    MemberCouponRepository-->>OrderService: valid/invalid
+    OrderService->>OrderRepository: save(Order)
+    OrderService->>OrderItemRepository: saveAll(OrderItems)
+    OrderRepository-->>OrderService: Order
+    OrderService-->>OrderController: OrderDto
+    OrderController-->>User: 200 OK
+
+    User->>OrderController: POST /api/orders/{id}/pay
+    OrderController->>OrderService: payOrder(orderId)
+    OrderService->>MemberRepository: checkBalance(memberId)
+    MemberRepository-->>OrderService: balance
+    OrderService->>MemberRepository: deductBalance(amount)
+    MemberRepository-->>OrderService: updatedBalance
+    OrderService->>MemberCouponRepository: markCouponUsed(memberCouponId)
+    OrderService->>ProductService: finalizeStock(orderItems)
+    OrderService->>OrderRepository: updateStatus(CONFIRMED)
+    OrderRepository-->>OrderService: updatedOrder
+    OrderService-->>OrderController: OrderDto
+    OrderController-->>User: 200 OK
