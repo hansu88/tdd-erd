@@ -1,178 +1,36 @@
 {
   "members": [
-    {
-      "id": 1,
-      "email": "user1@test.com",
-      "name": "홍길동",
-      "balance": 50000,
-      "status": "ACTIVE",
-      "createdAt": "2025-10-20T12:00:00"
-    },
-    {
-      "id": 2,
-      "email": "user2@test.com",
-      "name": "김영희",
-      "balance": 100000,
-      "status": "ACTIVE",
-      "createdAt": "2025-10-22T09:30:00"
-    }
+    { "id": 1, "email": "user1@test.com", "name": "홍길동", "balance": 50000, "status": "ACTIVE", "createdAt": "2025-10-20T12:00:00" }
   ],
 
   "products": [
-    {
-      "id": 1,
-      "productName": "기본 반팔 티셔츠",
-      "basePrice": 19000,
-      "status": "ACTIVE",
-      "createdAt": "2025-10-10T10:00:00"
-    },
-    {
-      "id": 2,
-      "productName": "슬림 청바지",
-      "basePrice": 49000,
-      "status": "ACTIVE",
-      "createdAt": "2025-10-12T15:00:00"
-    }
+    { "id": 1, "productName": "기본 반팔 티셔츠", "basePrice": 19000, "status": "ACTIVE", "createdAt": "2025-10-10T10:00:00" },
+    { "id": 2, "productName": "슬림 청바지", "basePrice": 49000, "status": "ACTIVE", "createdAt": "2025-10-12T15:00:00" }
   ],
 
   "productOptions": [
-    {
-      "id": 101,
-      "productId": 1,
-      "optionName": "화이트 - M",
-      "additionalPrice": 0,
-      "status": "ACTIVE",
-      "createdAt": "2025-10-10T10:00:00"
-    },
-    {
-      "id": 102,
-      "productId": 1,
-      "optionName": "빨강 - L",
-      "additionalPrice": 3000,
-      "status": "ACTIVE",
-      "createdAt": "2025-10-11T11:00:00"
-    },
-    {
-      "id": 201,
-      "productId": 2,
-      "optionName": "진청 - 32",
-      "additionalPrice": 0,
-      "status": "ACTIVE",
-      "createdAt": "2025-10-12T15:00:00"
-    },
-    {
-      "id": 202,
-      "productId": 2,
-      "optionName": "연청 - 34",
-      "additionalPrice": 2000,
-      "status": "ACTIVE",
-      "createdAt": "2025-10-13T16:00:00"
-    }
-  ],
-
-  "stocks": [
-    {
-      "id": 1,
-      "optionId": 101,
-      "availableQuantity": 50,
-      "reservedQuantity": 0,
-      "version": 1,
-      "updatedAt": "2025-10-28T10:00:00"
-    },
-    {
-      "id": 2,
-      "optionId": 102,
-      "availableQuantity": 5,
-      "reservedQuantity": 0,
-      "version": 1,
-      "updatedAt": "2025-10-28T10:00:00"
-    },
-    {
-      "id": 3,
-      "optionId": 201,
-      "availableQuantity": 20,
-      "reservedQuantity": 0,
-      "version": 1,
-      "updatedAt": "2025-10-28T10:00:00"
-    }
+    { "id": 101, "productId": 1, "optionName": "화이트 - M", "additionalPrice": 0, "status": "ACTIVE", "availableStock": 50 },
+    { "id": 102, "productId": 1, "optionName": "빨강 - L", "additionalPrice": 3000, "status": "ACTIVE", "availableStock": 5 },
+    { "id": 201, "productId": 2, "optionName": "진청 - 32", "additionalPrice": 0, "status": "ACTIVE", "availableStock": 20 }
   ],
 
   "carts": [
-    {
-      "id": 1,
-      "memberId": 1,
-      "optionId": 101,
-      "quantity": 2,
-      "createdAt": "2025-10-27T12:00:00"
-    }
-  ],
-
-  "coupons": [
-    {
-      "id": 1,
-      "couponName": "10% 할인쿠폰",
-      "discountType": "RATE",
-      "discountValue": 10,
-      "minOrderAmount": 10000,
-      "maxDiscountAmount": 5000,
-      "totalQuantity": 100,
-      "issuedQuantity": 30,
-      "validFrom": "2025-10-20T00:00:00",
-      "validUntil": "2025-12-31T23:59:59",
-      "createdAt": "2025-10-20T00:00:00"
-    }
-  ],
-
-  "memberCoupons": [
-    {
-      "id": 1,
-      "memberId": 1,
-      "couponId": 1,
-      "status": "UNUSED",
-      "issuedAt": "2025-10-25T12:00:00",
-      "usedAt": "",
-      "expiredAt": "2025-12-31T23:59:59"
-    }
+    { "id": 1, "memberId": 1, "optionId": 101, "quantity": 2, "createdAt": "2025-10-27T12:00:00" }
   ],
 
   "orders": [
-    {
-      "id": 1,
-      "memberId": 1,
-      "memberCouponId": 1,
-      "orderNumber": "ORD-20251028-0001",
-      "status": "CONFIRMED",
-      "productTotalAmount": 38000,
-      "discountAmount": 3800,
-      "finalAmount": 34200,
-      "createdAt": "2025-10-28T14:00:00"
-    }
+    { "id": 1, "memberId": 1, "memberCouponId": 1, "status": "PENDING", "finalAmount": 38000, "createdAt": "2025-10-28T14:00:00" }
   ],
 
   "orderItems": [
-    {
-      "id": 1,
-      "orderId": 1,
-      "productId": 1,
-      "optionId": 101,
-      "quantity": 2,
-      "unitPrice": 19000,
-      "totalPrice": 38000,
-      "createdAt": "2025-10-28T14:00:00"
-    }
+    { "id": 1, "orderId": 1, "productId": 1, "optionId": 101, "quantity": 2, "unitPrice": 19000, "totalPrice": 38000, "createdAt": "2025-10-28T14:00:00" }
   ],
 
-  "stockHistories": [
-    {
-      "id": 1,
-      "stockId": 1,
-      "orderId": 1,
-      "changeType": "CONFIRM",
-      "quantityChange": -2,
-      "beforeQuantity": 50,
-      "afterQuantity": 48,
-      "reason": "주문 확정",
-      "createdAt": "2025-10-28T14:00:00"
-    }
+  "coupons": [
+    { "id": 1, "couponName": "10% 할인쿠폰", "discountType": "RATE", "discountValue": 10, "totalQuantity": 100, "issuedQuantity": 30, "validFrom": "2025-10-20T00:00:00", "validUntil": "2025-12-31T23:59:59" }
+  ],
+
+  "memberCoupons": [
+    { "id": 1, "memberId": 1, "couponId": 1, "status": "UNUSED", "issuedAt": "2025-10-25T12:00:00", "usedAt": null, "expiredAt": "2025-12-31T23:59:59" }
   ]
 }
