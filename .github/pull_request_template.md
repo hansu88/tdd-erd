@@ -7,17 +7,16 @@
 - [ ] Mock API 구현
 - [ ] Swagger 문서화
 - [ ] 기능 구현
-- [ ] 버그 수정
 
 ## 🎯 요구사항 체크리스트
 
 ### 📊 기본 과제
 - [ ] ERD 설계 완료
-- [ ] API 명세서 10개 작성
-- [ ] Sequence Diagram 10개 작성
+- [ ] API 명세서 작성
+- [ ] Sequence Diagram 작성
 
 ### 💻 심화 과제
-- [ ] Mock Controller 10개 구현
+- [ ] Mock Controller 구현
 - [ ] Request/Response DTO 작성
 - [ ] Swagger 자동 문서화
 
