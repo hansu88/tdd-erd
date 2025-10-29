@@ -32,6 +32,7 @@ erDiagram
         varchar option_name "옵션명"
         int additional_price "추가금액"
         varchar status "상태(ACTIVE,INACTIVE)"
+        int available_stock "재고수량"
     }
 
     CART {
