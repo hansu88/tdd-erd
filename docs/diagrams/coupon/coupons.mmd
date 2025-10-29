@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant User
+    participant CouponController
+    participant CouponService
+    participant MemberCouponRepository
+    participant CouponRepository
+
+    User->>CouponController: POST /api/coupons/{id}/issue
+    CouponController->>CouponService: issueCoupon(couponId)
+    CouponService->>CouponRepository: findById(couponId)
+    CouponService->>MemberCouponRepository: save(MemberCoupon)
+    MemberCouponRepository-->>CouponService: MemberCoupon
+    CouponService-->>CouponController: MemberCouponDto
+    CouponController-->>User: 200 OK
+
+    User->>CouponController: GET /api/coupons/my
+    CouponController->>CouponService: getMyCoupons()
+    CouponService->>MemberCouponRepository: findByMember()
+    MemberCouponRepository-->>CouponService: List<MemberCoupon>
+    CouponService-->>CouponController: List<MemberCouponDto>
+    CouponController-->>User: 200 OK

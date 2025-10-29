@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant User
+    participant ProductController
+    participant ProductService
+    participant ProductRepository
+
+    User->>ProductController: GET /api/products
+    ProductController->>ProductService: getProducts()
+    ProductService->>ProductRepository: findAll()
+    ProductRepository-->>ProductService: List<Product>
+    ProductService-->>ProductController: List<ProductDto>
+    ProductController-->>User: 200 OK

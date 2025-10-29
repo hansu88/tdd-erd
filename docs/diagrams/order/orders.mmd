@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant User
+    participant OrderController
+    participant OrderService
+    participant OrderRepository
+    participant OrderItemRepository
+    participant MemberCouponRepository
+
+    User->>OrderController: POST /api/orders
+    OrderController->>OrderService: createOrder(request)
+    OrderService->>OrderRepository: save(Order)
+    OrderService->>OrderItemRepository: saveAll(OrderItems)
+    OrderRepository-->>OrderService: Order
+    OrderService-->>OrderController: OrderDto
+    OrderController-->>User: 200 OK
+
+    User->>OrderController: POST /api/orders/{id}/pay
+    OrderController->>OrderService: payOrder(orderId)
+    OrderService->>MemberCouponRepository: checkCouponUsage()
+    OrderService->>OrderRepository: updateStatus(CONFIRMED)
+    OrderService-->>OrderController: OrderDto
+    OrderController-->>User: 200 OK
