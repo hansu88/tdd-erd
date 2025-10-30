@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant Client
+    participant CartController
+    participant CartService
+    participant CartRepository
+    participant H2Database
+
+    Note over Client,H2Database: DELETE /api/cart/{cid} - 장바구니 삭제
+
+    Client->>CartController: DELETE /api/cart/1
+    CartController->>CartService: deleteCartItem(cid)
+    CartService->>CartRepository: existsById(cid)
+    CartRepository->>H2Database: SELECT COUNT(*) FROM CART WHERE cid = ?
+    H2Database-->>CartRepository: Result
+
+    alt 장바구니 항목이 없음
+        CartRepository-->>CartService: false
+        CartService-->>CartController: throw NotFoundException
+        CartController-->>Client: 404 Not Found { error: "CART001", message: "장바구니 항목을 찾을 수 없습니다" }
+    else 장바구니 항목 존재
+        CartRepository-->>CartService: true
+        CartService->>CartRepository: deleteById(cid)
+        CartRepository->>H2Database: DELETE FROM CART WHERE cid = ?
+        H2Database-->>CartRepository: Success
+        CartRepository-->>CartService: void
+        CartService-->>CartController: void
+        CartController-->>Client: 204 No Content
+    end

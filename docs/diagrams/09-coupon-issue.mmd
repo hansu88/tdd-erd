@@ -1,0 +1,42 @@
+sequenceDiagram
+    participant Client
+    participant CouponController
+    participant CouponService
+    participant CouponRepository
+    participant UserCouponRepository
+    participant H2Database
+
+    Note over Client,H2Database: POST /api/coupon/{cid}/issue - 쿠폰 발급
+
+    Client->>CouponController: POST /api/coupon/1/issue<br/>{ uid }
+    CouponController->>CouponService: issueCoupon(cid, uid)
+
+    Note over CouponService: 1. 쿠폰 조회 (Pessimistic Lock)
+
+    CouponService->>CouponRepository: findByIdForUpdate(cid)
+    CouponRepository->>H2Database: SELECT * FROM COUPON<br/>WHERE cid = ? FOR UPDATE
+    H2Database-->>CouponRepository: Coupon
+    CouponRepository-->>CouponService: Coupon
+
+    Note over CouponService: 2. 선착순 수량 체크
+
+    alt 쿠폰 소진 (issued >= total_quantity)
+        CouponService-->>CouponController: throw CouponSoldOutException
+        CouponController-->>Client: 409 Conflict<br/>{ error: "C001", message: "쿠폰이 모두 소진되었습니다" }
+    else 발급 가능
+        Note over CouponService: 3. 발급 수량 증가 (원자적 업데이트)
+
+        CouponService->>CouponRepository: increaseIssued(cid)
+        CouponRepository->>H2Database: UPDATE COUPON<br/>SET issued = issued + 1<br/>WHERE cid = ?
+        H2Database-->>CouponRepository: Success
+        CouponRepository-->>CouponService: void
+
+        Note over CouponService: 4. 사용자 쿠폰 생성
+
+        CouponService->>UserCouponRepository: save(userCoupon)
+        UserCouponRepository->>H2Database: INSERT INTO USER_COUPON<br/>(uid, cid, state)
+        H2Database-->>UserCouponRepository: UserCoupon
+        UserCouponRepository-->>CouponService: UserCoupon
+        CouponService-->>CouponController: CouponIssueResponseDto
+        CouponController-->>Client: 200 OK<br/>{ ucid, couponName, state: "ACTIVE", remainingQuantity }
+    end

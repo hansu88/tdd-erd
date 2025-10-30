@@ -1,0 +1,43 @@
+sequenceDiagram
+    participant Client
+    participant GoodsController
+    participant GoodsService
+    participant OrdItemRepository
+    participant OrdRepository
+    participant H2Database
+
+    Note over Client,H2Database: GET /api/goods/popular?days=3&limit=5
+
+    Client->>GoodsController: GET /api/goods/popular?days=3&limit=5
+    activate GoodsController
+
+    GoodsController->>GoodsService: getPopularGoods(days, limit)
+    activate GoodsService
+
+    Note over GoodsService: 최근 N일 기준 계산
+
+    GoodsService->>OrdRepository: findByCreatedAtAfter(cutoffDate)
+    activate OrdRepository
+    OrdRepository->>H2Database: SELECT * FROM ORD WHERE ctime > ?
+    activate H2Database
+    H2Database-->>OrdRepository: List<Ord>
+    deactivate H2Database
+    OrdRepository-->>GoodsService: List<Ord>
+    deactivate OrdRepository
+
+    GoodsService->>OrdItemRepository: findByOrderIds(orderIds)
+    activate OrdItemRepository
+    OrdItemRepository->>H2Database: SELECT * FROM ORD_ITEM WHERE oid IN (...)
+    activate H2Database
+    H2Database-->>OrdItemRepository: List<OrdItem>
+    deactivate H2Database
+    OrdItemRepository-->>GoodsService: List<OrdItem>
+    deactivate OrdItemRepository
+
+    Note over GoodsService: 상품별 판매량 집계, 판매량 순 정렬, Top N 추출
+
+    GoodsService-->>GoodsController: List<PopularGoodsDto>
+    deactivate GoodsService
+
+    GoodsController-->>Client: 200 OK { period: "3days", goods: [...] }
+    deactivate GoodsController

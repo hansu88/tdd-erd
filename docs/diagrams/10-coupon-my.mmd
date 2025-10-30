@@ -1,0 +1,38 @@
+sequenceDiagram
+    participant Client
+    participant CouponController
+    participant CouponService
+    participant UserCouponRepository
+    participant CouponRepository
+    participant H2Database
+
+    Note over Client,H2Database: GET /api/coupon/my?uid=1&state=ACTIVE
+
+    Client->>CouponController: GET /api/coupon/my?uid=1&state=ACTIVE
+    CouponController->>CouponService: getMyCoupons(uid, state)
+
+    Note over CouponService: 1. 사용자 쿠폰 조회
+
+    alt state 파라미터 있음
+        CouponService->>UserCouponRepository: findByUserIdAndState(uid, state)
+    else state 파라미터 없음
+        CouponService->>UserCouponRepository: findByUserId(uid)
+    end
+
+    UserCouponRepository->>H2Database: SELECT * FROM USER_COUPON<br/>WHERE uid = ? [AND state = ?]
+    H2Database-->>UserCouponRepository: List<UserCoupon>
+    UserCouponRepository-->>CouponService: List<UserCoupon>
+
+    Note over CouponService: 2. 쿠폰 상세 정보 조회
+
+    loop for each user coupon
+        CouponService->>CouponRepository: findById(cid)
+        CouponRepository->>H2Database: SELECT * FROM COUPON WHERE cid = ?
+        H2Database-->>CouponRepository: Coupon
+        CouponRepository-->>CouponService: Coupon
+
+        Note over CouponService: DTO 변환<br/>(쿠폰명, 할인 정보 포함)
+    end
+
+    CouponService-->>CouponController: List<UserCouponResponseDto>
+    CouponController-->>Client: 200 OK<br/>{ coupons: [...] }

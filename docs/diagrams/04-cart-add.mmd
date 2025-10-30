@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant Client
+    participant CartController
+    participant CartService
+    participant VariantRepository
+    participant CartRepository
+    participant H2Database
+
+    Note over Client,H2Database: POST /api/cart - 장바구니 담기
+
+    Client->>CartController: POST /api/cart { uid, vid, cnt }
+    CartController->>CartService: addToCart(request)
+
+    Note over CartService: 재고 확인
+
+    CartService->>VariantRepository: findById(vid)
+    VariantRepository->>H2Database: SELECT * FROM GOODS_VARIANT WHERE vid = ?
+    H2Database-->>VariantRepository: GoodsVariant
+    VariantRepository-->>CartService: GoodsVariant
+
+    alt 재고 부족
+        CartService-->>CartController: throw InsufficientStockException
+        CartController-->>Client: 400 Bad Request { error: "P002", message: "재고가 부족합니다" }
+    else 재고 충분
+        CartService->>CartRepository: save(cart)
+        CartRepository->>H2Database: INSERT INTO CART (uid, vid, cnt)
+        H2Database-->>CartRepository: Cart
+        CartRepository-->>CartService: Cart
+        CartService-->>CartController: CartResponseDto
+        CartController-->>Client: 200 OK { cid, uid, vid, cnt, ... }
+    end

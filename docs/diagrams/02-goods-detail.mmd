@@ -1,0 +1,29 @@
+sequenceDiagram
+    participant Client
+    participant GoodsController
+    participant GoodsService
+    participant GoodsRepository
+    participant VariantRepository
+    participant H2Database
+
+    Note over Client,H2Database: GET /api/goods/{gid} - 상품 상세 조회
+
+    Client->>GoodsController: GET /api/goods/1
+    GoodsController->>GoodsService: getGoodsDetail(gid)
+    GoodsService->>GoodsRepository: findById(gid)
+    GoodsRepository->>H2Database: SELECT * FROM GOODS WHERE gid = ?
+    H2Database-->>GoodsRepository: Result
+
+    alt 상품이 존재하지 않음
+        GoodsRepository-->>GoodsService: Empty
+        GoodsService-->>GoodsController: throw NotFoundException
+        GoodsController-->>Client: 404 Not Found { error: "P001", message: "상품을 찾을 수 없습니다" }
+    else 상품 존재
+        GoodsRepository-->>GoodsService: Goods
+        GoodsService->>VariantRepository: findByGoodsId(gid)
+        VariantRepository->>H2Database: SELECT * FROM GOODS_VARIANT WHERE gid = ?
+        H2Database-->>VariantRepository: List<GoodsVariant>
+        VariantRepository-->>GoodsService: List<GoodsVariant>
+        GoodsService-->>GoodsController: GoodsDetailDto
+        GoodsController-->>Client: 200 OK { gid, title, variants: [...] }
+    end

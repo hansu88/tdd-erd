@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant Client
+    participant GoodsController
+    participant GoodsService
+    participant GoodsRepository
+    participant H2Database
+
+    Note over Client,H2Database: GET /api/goods - 전체 상품 조회
+
+    Client->>GoodsController: GET /api/goods
+    activate GoodsController
+
+    GoodsController->>GoodsService: getAllGoods()
+    activate GoodsService
+
+    GoodsService->>GoodsRepository: findAll()
+    activate GoodsRepository
+
+    GoodsRepository->>H2Database: SELECT * FROM GOODS
+    activate H2Database
+    H2Database-->>GoodsRepository: List<Goods>
+    deactivate H2Database
+
+    GoodsRepository-->>GoodsService: List<Goods>
+    deactivate GoodsRepository
+
+    GoodsService-->>GoodsController: List<GoodsDto>
+    deactivate GoodsService
+
+    GoodsController-->>Client: 200 OK { goods: [...] }
+    deactivate GoodsController
