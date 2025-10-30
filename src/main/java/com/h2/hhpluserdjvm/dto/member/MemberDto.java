@@ -1,5 +1,4 @@
-package com.h2.hhpluserdjvm.dto;
-
+package com.h2.hhpluserdjvm.dto.member;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,11 +8,11 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderDto {
-    private Long orderId;
+public class MemberDto {
     private Long memberId;
-    private Long memberCouponId; // nullable
-    private String status; // PENDING, CONFIRMED, CANCELLED
-    private Integer finalAmount;
+    private String email;
+    private String name;
+    private Integer balance;
+    private String status; // ACTIVE, INACTIVE
     private LocalDateTime createdAt;
 }

@@ -1,9 +1,9 @@
 package com.h2.hhpluserdjvm.service;
 
-import com.h2.hhpluserdjvm.dto.OrderDto;
-import com.h2.hhpluserdjvm.dto.OrderItemDto;
-import com.h2.hhpluserdjvm.dto.ProductDto;
-import com.h2.hhpluserdjvm.dto.ProductOptionDto;
+import com.h2.hhpluserdjvm.dto.order.OrderDto;
+import com.h2.hhpluserdjvm.dto.order.OrderItemDto;
+import com.h2.hhpluserdjvm.dto.product.ProductDto;
+import com.h2.hhpluserdjvm.dto.product.ProductOptionDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 

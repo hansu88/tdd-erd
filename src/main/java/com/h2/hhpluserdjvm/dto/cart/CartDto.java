@@ -1,4 +1,4 @@
-package com.h2.hhpluserdjvm.dto;
+package com.h2.hhpluserdjvm.dto.cart;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,11 +8,10 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberDto {
+public class CartDto {
+    private Long cartId;
     private Long memberId;
-    private String email;
-    private String name;
-    private Integer balance;
-    private String status; // ACTIVE, INACTIVE
+    private Long optionId;
+    private Integer quantity;
     private LocalDateTime createdAt;
 }

@@ -1,7 +1,6 @@
 package com.h2.hhpluserdjvm.controller;
 
-import com.h2.hhpluserdjvm.dto.ProductDto;
-import com.h2.hhpluserdjvm.dto.ProductOptionDto;
+import com.h2.hhpluserdjvm.dto.product.ProductDto;
 import com.h2.hhpluserdjvm.service.ProductService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;

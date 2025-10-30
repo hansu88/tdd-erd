@@ -1,4 +1,4 @@
-package com.h2.hhpluserdjvm.dto;
+package com.h2.hhpluserdjvm.dto.coupon;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

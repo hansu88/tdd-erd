@@ -1,7 +1,6 @@
 package com.h2.hhpluserdjvm.service;
 
-import com.h2.hhpluserdjvm.dto.CartDto;
-import com.h2.hhpluserdjvm.dto.ProductDto;
+import com.h2.hhpluserdjvm.dto.cart.CartDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
