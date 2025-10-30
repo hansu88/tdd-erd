@@ -84,7 +84,8 @@ CREATE TABLE COUPON (
     type VARCHAR(10) NOT NULL COMMENT '타입',
     val INT NOT NULL COMMENT '할인값',
     limit_amt INT COMMENT '최대 할인',
-    issued INT NOT NULL DEFAULT 0 COMMENT '발급수량'
+    max_quantity INT NOT NULL COMMENT '최대 발급 가능 수량',
+    issued INT NOT NULL DEFAULT 0 COMMENT '현재까지 발급된 수량'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='쿠폰';
 ```
 
@@ -202,6 +203,7 @@ erDiagram
         varchar type
         int val
         int limit_amt
+        int max_quantity
         int issued
     }
 
