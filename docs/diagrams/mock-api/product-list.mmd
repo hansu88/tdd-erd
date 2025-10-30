@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant User
+    participant ProductController
+    participant ProductService
+    participant MockAPI
+
+    User->>ProductController: GET /api/products
+    activate ProductController
+    ProductController->>ProductService: getAllProducts()
+    activate ProductService
+
+    ProductService->>MockAPI: GET /products
+    activate MockAPI
+    MockAPI-->>ProductService: ProductDto[]
+    deactivate MockAPI
+
+    loop for each product
+        ProductService->>MockAPI: GET /productOptions?productId={id}
+        activate MockAPI
+        MockAPI-->>ProductService: ProductOptionDto[]
+        deactivate MockAPI
+        Note over ProductService: 재고 합산 (totalStock)
+    end
+
+    ProductService-->>ProductController: List<ProductResponseDto>
+    deactivate ProductService
+    ProductController-->>User: 200 OK
+    deactivate ProductController

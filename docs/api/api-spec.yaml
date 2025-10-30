@@ -1,0 +1,159 @@
+openapi: 3.0.0
+info:
+  title: HHPlus Mock API (실제 구현)
+  version: 1.0.0
+  description: 실제 구현된 6개 API (상품 3개, 장바구니 2개, 주문 1개)
+
+servers:
+  - url: http://localhost:8080
+    description: Spring Boot Server
+
+paths:
+  # 상품 목록 조회
+  /api/products:
+    get:
+      summary: 상품 목록 조회
+      tags: [Product]
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    productId: { type: integer }
+                    productName: { type: string }
+                    basePrice: { type: integer }
+                    status: { type: string }
+                    totalStock: { type: integer }
+
+  # 상품 재고 조회
+  /api/products/{productId}/stock:
+    get:
+      summary: 상품 재고 조회
+      tags: [Product]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: integer
+
+  # 인기 상품 조회
+  /api/products/popular:
+    get:
+      summary: 인기 상품 조회
+      tags: [Product]
+      parameters:
+        - name: days
+          in: query
+          schema: { type: integer, default: 3 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 5 }
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    productId: { type: integer }
+                    productName: { type: string }
+                    price: { type: integer }
+                    status: { type: string }
+
+  # 전체 장바구니 조회
+  /api/carts:
+    get:
+      summary: 전체 장바구니 조회
+      tags: [Cart]
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    cartId: { type: integer }
+                    memberId: { type: integer }
+                    optionId: { type: integer }
+                    quantity: { type: integer }
+                    createdAt: { type: string }
+                    productId: { type: integer }
+                    productName: { type: string }
+                    optionName: { type: string }
+
+  # 개인 장바구니 조회
+  /api/carts/{memberId}:
+    get:
+      summary: 개인 장바구니 조회
+      tags: [Cart]
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    cartId: { type: integer }
+                    memberId: { type: integer }
+                    optionId: { type: integer }
+                    quantity: { type: integer }
+                    createdAt: { type: string }
+                    productId: { type: integer }
+                    productName: { type: string }
+                    optionName: { type: string }
+
+  # 주문 생성
+  /api/orders:
+    post:
+      summary: 주문 생성 (쿠폰 할인 포함)
+      tags: [Order]
+      parameters:
+        - name: memberId
+          in: query
+          required: true
+          schema: { type: integer }
+        - name: memberCouponId
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId: { type: integer }
+                  status: { type: string }
+                  subtotalAmount: { type: integer }
+                  discountAmount: { type: integer }
+                  totalAmount: { type: integer }
+                  createdAt: { type: string }
+                  items: { type: array }

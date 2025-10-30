@@ -1,0 +1,36 @@
+sequenceDiagram
+    participant User
+    participant ProductController
+    participant ProductService
+    participant MockAPI
+
+    User->>ProductController: GET /api/products/popular?days=3&limit=5
+    activate ProductController
+    ProductController->>ProductService: getPopularProducts(days, limit)
+    activate ProductService
+
+    ProductService->>MockAPI: GET /products
+    activate MockAPI
+    MockAPI-->>ProductService: ProductDto[]
+    deactivate MockAPI
+
+    ProductService->>MockAPI: GET /orderItems
+    activate MockAPI
+    MockAPI-->>ProductService: OrderItemDto[]
+    deactivate MockAPI
+
+    ProductService->>MockAPI: GET /orders
+    activate MockAPI
+    MockAPI-->>ProductService: OrderDto[]
+    deactivate MockAPI
+
+    Note over ProductService: 1. status='PAID'인 주문 필터링
+    Note over ProductService: 2. 최근 N일 주문 필터링
+    Note over ProductService: 3. 상품별 판매량 집계
+    Note over ProductService: 4. 판매량 순 정렬
+    Note over ProductService: 5. Top N 추출
+
+    ProductService-->>ProductController: List<PopularProductResponseDto>
+    deactivate ProductService
+    ProductController-->>User: 200 OK
+    deactivate ProductController

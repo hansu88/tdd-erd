@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant User
+    participant CartController
+    participant CartService
+    participant CartRepository
+
+    User->>CartController: POST /api/carts
+    CartController->>CartService: addCartItem(request)
+    CartService->>CartRepository: save(Cart)
+    CartRepository-->>CartService: Cart
+    CartService-->>CartController: CartDto
+    CartController-->>User: 200 OK
+
+    User->>CartController: GET /api/carts
+    CartController->>CartService: getCartItems()
+    CartService->>CartRepository: findByMember()
+    CartRepository-->>CartService: List<Cart>
+    CartService-->>CartController: List<CartDto>
+    CartController-->>User: 200 OK
+
+    User->>CartController: DELETE /api/carts/{id}
+    CartController->>CartService: deleteCartItem(id)
+    CartService->>CartRepository: deleteById(id)
+    CartController-->>User: 204 No Content

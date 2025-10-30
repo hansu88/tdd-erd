@@ -1,0 +1,34 @@
+sequenceDiagram
+    participant User
+    participant CartController
+    participant CartService
+    participant MockAPI
+
+    User->>CartController: GET /api/carts/{memberId}
+    activate CartController
+    CartController->>CartService: getCart(memberId)
+    activate CartService
+
+    CartService->>MockAPI: GET /carts?memberId={id}
+    activate MockAPI
+    MockAPI-->>CartService: CartDto[]
+    deactivate MockAPI
+
+    loop for each cart
+        CartService->>MockAPI: GET /productOptions?optionId={id}
+        activate MockAPI
+        MockAPI-->>CartService: ProductOptionDto[]
+        deactivate MockAPI
+
+        CartService->>MockAPI: GET /products?productId={id}
+        activate MockAPI
+        MockAPI-->>CartService: ProductDto[]
+        deactivate MockAPI
+
+        Note over CartService: CartResponseDto 변환<br/>(상품명, 옵션명 추가)
+    end
+
+    CartService-->>CartController: List<CartResponseDto>
+    deactivate CartService
+    CartController-->>User: 200 OK
+    deactivate CartController

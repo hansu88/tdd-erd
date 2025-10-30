@@ -35,3 +35,28 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### 로그 파일 ###
+*.log
+*.log.*
+logs/
+
+### 환경 변수 및 로컬 설정 ###
+.env
+.env.local
+application-local.properties
+application-local.yml
+**/application-secret*.properties
+**/application-secret*.yml
+
+### 데이터베이스 파일 (H2 등) ###
+*.db
+*.mv.db
+*.trace.db
+
+### OS 관련 ###
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
