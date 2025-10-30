@@ -1,6 +1,7 @@
 package com.h2.hhpluserdjvm.controller;
 
 import com.h2.hhpluserdjvm.dto.ProductDto;
+import com.h2.hhpluserdjvm.dto.ProductOptionDto;
 import com.h2.hhpluserdjvm.service.ProductService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -14,9 +15,13 @@ public class ProductController {
         this.productService = productService;
     }
 
-    // 상품 목록 조회
     @GetMapping
     public List<ProductDto> getProducts() {
         return productService.getAllProducts();
+    }
+
+    @GetMapping("/{productId}/stock")
+    public int getProductStock(@PathVariable Long productId) {
+        return productService.getTotalStock(productId);
     }
 }
