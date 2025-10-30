@@ -1,0 +1,53 @@
+sequenceDiagram
+    participant Client
+    participant CartController
+    participant CartService
+    participant CartRepository
+    participant VariantRepository
+    participant GoodsRepository
+    participant H2Database
+
+    Note over Client,H2Database: GET /api/cart?uid=1 - 장바구니 조회
+
+    Client->>CartController: GET /api/cart?uid=1
+    activate CartController
+
+    CartController->>CartService: getCartItems(uid)
+    activate CartService
+
+    CartService->>CartRepository: findByUserId(uid)
+    activate CartRepository
+    CartRepository->>H2Database: SELECT * FROM CART WHERE uid = ?
+    activate H2Database
+    H2Database-->>CartRepository: List<Cart>
+    deactivate H2Database
+    CartRepository-->>CartService: List<Cart>
+    deactivate CartRepository
+
+    loop for each cart item
+        CartService->>VariantRepository: findById(vid)
+        activate VariantRepository
+        VariantRepository->>H2Database: SELECT * FROM GOODS_VARIANT WHERE vid = ?
+        activate H2Database
+        H2Database-->>VariantRepository: GoodsVariant
+        deactivate H2Database
+        VariantRepository-->>CartService: GoodsVariant
+        deactivate VariantRepository
+
+        CartService->>GoodsRepository: findById(gid)
+        activate GoodsRepository
+        GoodsRepository->>H2Database: SELECT * FROM GOODS WHERE gid = ?
+        activate H2Database
+        H2Database-->>GoodsRepository: Goods
+        deactivate H2Database
+        GoodsRepository-->>CartService: Goods
+        deactivate GoodsRepository
+
+        Note over CartService: DTO 변환 (상품명, 옵션명, 가격 포함)
+    end
+
+    CartService-->>CartController: CartListResponseDto
+    deactivate CartService
+
+    CartController-->>Client: 200 OK { items: [...], totalAmount }
+    deactivate CartController
