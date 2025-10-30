@@ -51,7 +51,6 @@ public class CartService {
      * Todo: 필요한 정보  MockApi 활용해서 조회
      */
     private CartResponseDto convertToResponseDto(CartDto cart) {
-        // 1. 옵션 단일 조회
         ProductOptionDto[] options = restTemplate.getForObject(
                 MOCK_API_BASE + "/productOptions?id=" + cart.getOptionId(),
                 ProductOptionDto[].class
@@ -61,7 +60,6 @@ public class CartService {
         Long productId = option != null ? option.getProductId() : null;
         String optionName = option != null ? option.getOptionName() : null;
 
-        // 2. 상품 단일 조회
         ProductDto[] products = restTemplate.getForObject(
                 MOCK_API_BASE + "/products?id=" + productId,
                 ProductDto[].class
@@ -70,7 +68,6 @@ public class CartService {
 
         String productName = product != null ? product.getProductName() : null;
 
-        // 3. CartResponseDto 생성
         return new CartResponseDto(
                 cart.getCartId(),
                 cart.getMemberId(),
