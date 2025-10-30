@@ -1,6 +1,6 @@
 package com.h2.hhpluserdjvm.controller;
 
-import com.h2.hhpluserdjvm.dto.cart.CartDto;
+import com.h2.hhpluserdjvm.dto.cart.CartResponseDto;
 import com.h2.hhpluserdjvm.service.CartService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +17,12 @@ public class CartController {
     }
 
     @GetMapping
-    public List<CartDto> getCarts() {
+    public List<CartResponseDto> getCarts() {
         return cartService.getAllCarts();
     }
 
     @GetMapping("/{memberId}")
-    public List<CartDto> getCart(@PathVariable Long memberId) {
+    public List<CartResponseDto> getCart(@PathVariable Long memberId) {
         return cartService.getCart(memberId);
     }
 
