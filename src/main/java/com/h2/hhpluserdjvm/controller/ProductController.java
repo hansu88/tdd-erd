@@ -1,10 +1,10 @@
 package com.h2.hhpluserdjvm.controller;
 
-import com.h2.hhpluserdjvm.dto.product.ProductDto;
+import com.h2.hhpluserdjvm.dto.product.PopularProductResponseDto;
+import com.h2.hhpluserdjvm.dto.product.ProductResponseDto;
 import com.h2.hhpluserdjvm.service.ProductService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
@@ -17,7 +17,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductDto> getProducts() {
+    public List<ProductResponseDto> getProducts() {
         return productService.getAllProducts();
     }
 
@@ -27,9 +27,9 @@ public class ProductController {
     }
 
     @GetMapping("/popular")
-    public List<Map<String, Object>> getPopularProducts(
+    public List<PopularProductResponseDto> getPopularProducts(
             @RequestParam(defaultValue = "3") int days,
-            @RequestParam(defaultValue = "1") int limit) {
+            @RequestParam(defaultValue = "5") int limit) {
         return productService.getPopularProducts(days, limit);
     }
 }

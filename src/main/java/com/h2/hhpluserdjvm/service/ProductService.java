@@ -2,15 +2,16 @@ package com.h2.hhpluserdjvm.service;
 
 import com.h2.hhpluserdjvm.dto.order.OrderDto;
 import com.h2.hhpluserdjvm.dto.order.OrderItemDto;
+import com.h2.hhpluserdjvm.dto.product.PopularProductResponseDto;
 import com.h2.hhpluserdjvm.dto.product.ProductDto;
 import com.h2.hhpluserdjvm.dto.product.ProductOptionDto;
+import com.h2.hhpluserdjvm.dto.product.ProductResponseDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 @Service
 public class ProductService {
@@ -22,74 +23,78 @@ public class ProductService {
         this.restTemplate = restTemplate;
     }
 
-    /*
-    Todo: 전체 상품 조회
-    */
-    public List<ProductDto> getAllProducts() {
+    /**
+     * TODO: 전체 상품 조회 (ProductResponseDto)
+     */
+    public List<ProductResponseDto> getAllProducts() {
         ProductDto[] products = restTemplate.getForObject(MOCK_API_BASE + "/products", ProductDto[].class);
-        return Arrays.asList(products);
+        if (products == null) return Collections.emptyList();
+
+        List<ProductResponseDto> result = new ArrayList<>();
+        for (ProductDto p : products) {
+            int totalStock = getTotalStock(p.getProductId());
+            result.add(new ProductResponseDto(
+                    p.getProductId(),
+                    p.getProductName(),
+                    p.getBasePrice(),
+                    p.getStatus(),
+                    totalStock
+            ));
+        }
+        return result;
     }
 
-    /*
-    Todo: 하나의 상품 재고 확인
+    /**
+     * TODO: 상품 재고 합계 조회
      */
-
-    public List<ProductOptionDto> getProductStock(Long productId) {
+    public int getTotalStock(Long productId) {
         ProductOptionDto[] options = restTemplate.getForObject(
                 MOCK_API_BASE + "/productOptions?productId=" + productId,
                 ProductOptionDto[].class
         );
-        return Arrays.asList(options);
-    }
+        if (options == null) return 0;
 
-    public int getTotalStock(Long productId) {
-        List<ProductOptionDto> options = getProductStock(productId);
-        return options.stream()
+        return Arrays.stream(options)
                 .mapToInt(ProductOptionDto::getAvailableStock)
                 .sum();
     }
 
-    /*
-    Todo: 인기상품 조회
+    /**
+     * TODO: 인기 상품 조회 (PopularProductResponseDto)
      */
-    public List<Map<String, Object>> getPopularProducts(int days, int limit) {
-        List<ProductDto> allProducts = getAllProducts();
+    public List<PopularProductResponseDto> getPopularProducts(int days, int limit) {
+        ProductDto[] allProducts = restTemplate.getForObject(MOCK_API_BASE + "/products", ProductDto[].class);
         OrderItemDto[] orderItems = restTemplate.getForObject(MOCK_API_BASE + "/orderItems", OrderItemDto[].class);
         OrderDto[] orders = restTemplate.getForObject(MOCK_API_BASE + "/orders", OrderDto[].class);
 
-        // 시간 지정 (현재 시간 - 몇일전 기록)
+        if (allProducts == null || orderItems == null || orders == null) return Collections.emptyList();
+
         LocalDateTime cutoff = LocalDateTime.now().minusDays(days);
 
-        // 최근 결제 완료 주문 ID 추출
-        Set<Long> recentPaidOrderIds = Arrays.stream(orders)
+        // 결제 완료 주문 필터링
+        Set<Long> paidOrderIds = Arrays.stream(orders)
                 .filter(o -> "PAID".equals(o.getStatus()))
                 .filter(o -> o.getCreatedAt().isAfter(cutoff))
                 .map(OrderDto::getOrderId)
                 .collect(Collectors.toSet());
 
-        // 상품별 판매량 합산
-        Map<Long, Integer> productCountMap = Arrays.stream(orderItems)
-                .filter(oi -> recentPaidOrderIds.contains(oi.getOrderId()))
+        // 상품별 판매량 계산
+        Map<Long, Integer> salesMap = Arrays.stream(orderItems)
+                .filter(oi -> paidOrderIds.contains(oi.getOrderId()))
                 .collect(Collectors.groupingBy(OrderItemDto::getProductId,
                         Collectors.summingInt(OrderItemDto::getQuantity)));
 
-        // 인기상품 Top N 추출 및 Map 변환
-        List<Map<String, Object>> popularProducts = allProducts.stream()
-                .filter(p -> productCountMap.containsKey(p.getProductId()))
-                .sorted(Comparator.comparingInt((ProductDto p) -> productCountMap.get(p.getProductId()))
-                        .reversed())
+        // DTO 변환 (판매량은 안보여줌)
+        return Arrays.stream(allProducts)
+                .filter(p -> salesMap.containsKey(p.getProductId()))
+                .sorted(Comparator.comparingInt((ProductDto p) -> salesMap.get(p.getProductId())).reversed())
                 .limit(limit)
-                .map(p -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("id", p.getProductId());
-                    map.put("name", p.getProductName());
-                    map.put("price", p.getBasePrice());
-                    map.put("status", p.getStatus());
-                    map.put("soldQuantity", productCountMap.get(p.getProductId()));
-                    return map;
-                })
+                .map(p -> new PopularProductResponseDto(
+                        p.getProductId(),
+                        p.getProductName(),
+                        p.getBasePrice(),
+                        p.getStatus()
+                ))
                 .collect(Collectors.toList());
-
-        return popularProducts;
     }
 }
