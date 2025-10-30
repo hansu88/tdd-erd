@@ -1,0 +1,68 @@
+sequenceDiagram
+    participant User
+    participant OrderController
+    participant OrderService
+    participant MockAPI
+
+    User->>OrderController: POST /api/orders?memberId=1&memberCouponId=1
+    activate OrderController
+    OrderController->>OrderService: createOrder(memberId, memberCouponId)
+    activate OrderService
+
+    Note over OrderService,MockAPI: 1. 장바구니 조회
+    OrderService->>MockAPI: GET /carts?memberId={id}
+    activate MockAPI
+    MockAPI-->>OrderService: CartDto[]
+    deactivate MockAPI
+
+    alt 장바구니 비어있음
+        OrderService-->>OrderController: RuntimeException("장바구니가 비어있음")
+        OrderController-->>User: 500 Error
+    end
+
+    Note over OrderService,MockAPI: 2. 총 금액 계산
+    loop for each cart
+        OrderService->>MockAPI: GET /productOptions?optionId={id}
+        activate MockAPI
+        MockAPI-->>OrderService: ProductOptionDto[]
+        deactivate MockAPI
+
+        OrderService->>MockAPI: GET /products?productId={id}
+        activate MockAPI
+        MockAPI-->>OrderService: ProductDto[]
+        deactivate MockAPI
+
+        Note over OrderService: total += (basePrice + additionalPrice) * quantity
+    end
+
+    Note over OrderService,MockAPI: 3. 쿠폰 할인 적용 (선택)
+    alt memberCouponId exists
+        OrderService->>MockAPI: GET /memberCoupons?memberCouponId={id}
+        activate MockAPI
+        MockAPI-->>OrderService: MemberCouponDto[]
+        deactivate MockAPI
+
+        alt status != UNUSED
+            OrderService-->>OrderController: RuntimeException("쿠폰 사용 불가")
+            OrderController-->>User: 500 Error
+        end
+
+        OrderService->>MockAPI: GET /coupons?couponId={id}
+        activate MockAPI
+        MockAPI-->>OrderService: CouponDto[]
+        deactivate MockAPI
+
+        Note over OrderService: 할인 계산<br/>RATE: total * value / 100<br/>AMOUNT: value
+    end
+
+    Note over OrderService: finalAmount = total - discount
+
+    Note over OrderService,MockAPI: 4. 주문 생성 (임시)
+    Note over OrderService: orderId = 999 (Mock 테스트용)<br/>※ 실제 DB 저장 안 함
+
+    OrderService-->>OrderController: OrderResponseDto
+    deactivate OrderService
+    OrderController-->>User: 200 OK
+    deactivate OrderController
+
+    Note over User,MockAPI: ⚠️ 현재 미구현<br/>- 재고 차감<br/>- 잔액 차감<br/>- 쿠폰 사용 처리<br/><br/>DB 도입 시 추가 예정
